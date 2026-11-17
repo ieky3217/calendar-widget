@@ -57,6 +57,9 @@ class SettingsActivity : Activity() {
         bindRadio(
             R.id.rg_week, listOf(R.id.rb_sun to 0, R.id.rb_mon to 1), if (prefs.mondayStart) 1 else 0,
         ) { prefs = prefs.copy(mondayStart = it == 1) }
+        bindRadio(
+            R.id.rg_small, listOf(R.id.rb_small_month to 1, R.id.rb_small_week to 0), if (prefs.smallMonth) 1 else 0,
+        ) { prefs = prefs.copy(smallMonth = it == 1) }
 
         val alphaLabel = findViewById<TextView>(R.id.alpha_label)
         val seek = findViewById<SeekBar>(R.id.seek_alpha)
@@ -113,7 +116,10 @@ class SettingsActivity : Activity() {
     }
 
     private fun refreshPreview() {
-        showPreview(R.id.preview_week, WidgetRenderer.Kind.WEEK_S)
+        showPreview(
+            R.id.preview_week,
+            if (prefs.smallMonth) WidgetRenderer.Kind.MONTH_XS else WidgetRenderer.Kind.WEEK_S,
+        )
         showPreview(R.id.preview_month, WidgetRenderer.Kind.MONTH_S)
     }
 

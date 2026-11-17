@@ -37,8 +37,8 @@
 
                 <FrameLayout
                     android:id="@+id/preview_week"
-                    android:layout_width="180dp"
-                    android:layout_height="64dp" />
+                    android:layout_width="170dp"
+                    android:layout_height="100dp" />
 
                 <FrameLayout
                     android:id="@+id/preview_month"
@@ -204,6 +204,33 @@
                 android:textColor="#FFEDEDED"
                 android:textSize="15sp" />
         </RadioGroup>
+        <TextView
+            style="@style/SectionHead"
+            android:text="2×1など1段サイズの表示" />
+        <RadioGroup
+            android:id="@+id/rg_small"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/rb_small_month"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="14dp"
+                android:buttonTint="#FFE53935"
+                android:text="1か月"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+            <RadioButton
+                android:id="@+id/rb_small_week"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="#FFE53935"
+                android:text="1週間"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+        </RadioGroup>
+
         <Switch
             android:id="@+id/sw_holiday"
             android:layout_width="match_parent"

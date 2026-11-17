@@ -24,6 +24,7 @@ object WidgetRenderer {
     enum class Kind(val title: Float, val label: Float, val day: Float) {
         WEEK_S(10f, 9f, 13f),   // 2×1 など小さい横長：今週1行
         WEEK_L(12f, 10f, 16f),  // 4×1 など横に広い：今週1行（大きめ）
+        MONTH_XS(10f, 8f, 9f),  // 2×1 など1段：月表示（詰めて表示）
         MONTH_S(12f, 9f, 11f),  // 2×2〜3×2 程度：月表示
         MONTH_L(15f, 11f, 14f), // 4×3 以上：月表示（大きめ）
     }
@@ -35,24 +36,24 @@ object WidgetRenderer {
     /** ウィジェットに渡す RemoteViews。Android 12+ はサイズ別レイアウトをまとめて渡す */
     fun build(ctx: Context, id: Int, p: WidgetPrefs, offset: Int, options: Bundle?): RemoteViews {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            RemoteViews(
-                mapOf(
-                    SizeF(40f, 30f) to buildKind(ctx, id, p, offset, Kind.WEEK_S, true),
-                    SizeF(230f, 30f) to buildKind(ctx, id, p, offset, Kind.WEEK_L, true),
-                    SizeF(130f, 140f) to buildKind(ctx, id, p, offset, Kind.MONTH_S, true),
-                    SizeF(250f, 230f) to buildKind(ctx, id, p, offset, Kind.MONTH_L, true),
-                )
-            )
+            val small = if (p.smallMonth) {
+                listOf(SizeF(40f, 30f) to Kind.MONTH_XS)
+            } else {
+                listOf(SizeF(40f, 30f) to Kind.WEEK_S, SizeF(230f, 30f) to Kind.WEEK_L)
+            }
+            val all = small + listOf(SizeF(130f, 140f) to Kind.MONTH_S, SizeF(250f, 230f) to Kind.MONTH_L)
+            RemoteViews(all.associate { (size, kind) -> size to buildKind(ctx, id, p, offset, kind, true) })
         } else {
             val w = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH) ?: 0
             val h = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT) ?: 0
-            buildKind(ctx, id, p, offset, kindFor(w, h), true)
+            buildKind(ctx, id, p, offset, kindFor(w, h, p), true)
         }
     }
 
-    private fun kindFor(w: Int, h: Int): Kind = when {
+    private fun kindFor(w: Int, h: Int, p: WidgetPrefs): Kind = when {
         w >= 250 && h >= 230 -> Kind.MONTH_L
         w >= 130 && h >= 140 -> Kind.MONTH_S
+        p.smallMonth -> Kind.MONTH_XS
         w >= 230 -> Kind.WEEK_L
         else -> Kind.WEEK_S
     }
@@ -61,7 +62,7 @@ object WidgetRenderer {
         ctx: Context, id: Int, p: WidgetPrefs, offset: Int, kind: Kind, interactive: Boolean,
     ): RemoteViews = when (kind) {
         Kind.WEEK_S, Kind.WEEK_L -> buildWeek(ctx, id, p, kind, interactive)
-        Kind.MONTH_S, Kind.MONTH_L -> buildMonth(ctx, id, p, offset, kind, interactive)
+        Kind.MONTH_XS, Kind.MONTH_S, Kind.MONTH_L -> buildMonth(ctx, id, p, offset, kind, interactive)
     }
 
     // ---------- 週（1行）表示 ----------
@@ -101,7 +102,8 @@ object WidgetRenderer {
         val pal = palette(p)
         val today = LocalDate.now()
         val ym = YearMonth.from(today).plusMonths(offset.toLong())
-        val rv = RemoteViews(pkg, R.layout.widget_month)
+        val xs = kind == Kind.MONTH_XS
+        val rv = RemoteViews(pkg, if (xs) R.layout.widget_month_xs else R.layout.widget_month)
         applyBg(rv, p)
 
         rv.setTextViewText(R.id.title, "${ym.year}年${ym.monthValue}月")
@@ -109,7 +111,7 @@ object WidgetRenderer {
         rv.setTextViewTextSize(R.id.title, TypedValue.COMPLEX_UNIT_SP, kind.title)
         for (arrow in intArrayOf(R.id.prev, R.id.next)) {
             rv.setTextColor(arrow, pal.text)
-            rv.setTextViewTextSize(arrow, TypedValue.COMPLEX_UNIT_SP, kind.title + 4f)
+            rv.setTextViewTextSize(arrow, TypedValue.COMPLEX_UNIT_SP, kind.title + if (xs) 3f else 4f)
         }
 
         rv.removeAllViews(R.id.dow_row)
@@ -130,7 +132,7 @@ object WidgetRenderer {
             val row = RemoteViews(pkg, R.layout.row_month)
             for (c in 0 until 7) {
                 val d = start.plusDays((r * 7 + c).toLong())
-                val cell = RemoteViews(pkg, R.layout.cell_day)
+                val cell = RemoteViews(pkg, if (xs) R.layout.cell_day_xs else R.layout.cell_day)
                 setDay(cell, d, today, p, pal, YearMonth.from(d) == ym, kind)
                 row.addView(R.id.row, cell)
             }

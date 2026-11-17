@@ -10,6 +10,7 @@ data class WidgetPrefs(
     val accent: Int = 0xFFE53935.toInt(), // 今日の丸の色
     val mondayStart: Boolean = false,
     val holidays: Boolean = true,
+    val smallMonth: Boolean = true,      // 1段サイズ(2×1など)でも月表示にする
 )
 
 /** SharedPreferences への保存。id=null は「既定値（新しいウィジェット用）」 */
@@ -35,6 +36,7 @@ object Prefs {
             accent = s.getInt(key(id, "accent"), d.accent),
             mondayStart = s.getBoolean(key(id, "monday"), d.mondayStart),
             holidays = s.getBoolean(key(id, "holidays"), d.holidays),
+            smallMonth = s.getBoolean(key(id, "smallMonth"), d.smallMonth),
         )
     }
 
@@ -47,6 +49,7 @@ object Prefs {
             .putInt(key(id, "accent"), p.accent)
             .putBoolean(key(id, "monday"), p.mondayStart)
             .putBoolean(key(id, "holidays"), p.holidays)
+            .putBoolean(key(id, "smallMonth"), p.smallMonth)
             .apply()
     }
 
