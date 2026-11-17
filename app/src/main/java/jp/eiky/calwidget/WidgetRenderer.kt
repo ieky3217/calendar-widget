@@ -24,7 +24,7 @@ object WidgetRenderer {
     enum class Kind(val title: Float, val label: Float, val day: Float) {
         WEEK_S(10f, 9f, 13f),   // 2×1 など小さい横長：今週1行
         WEEK_L(12f, 10f, 16f),  // 4×1 など横に広い：今週1行（大きめ）
-        MONTH_XS(10f, 8f, 9f),  // 2×1 など1段：月表示（詰めて表示）
+        MONTH_XS(22f, 9f, 11f), // 2×1 など1段：月表示（年月は左の縦列）
         MONTH_S(12f, 9f, 11f),  // 2×2〜3×2 程度：月表示
         MONTH_L(15f, 11f, 14f), // 4×3 以上：月表示（大きめ）
     }
@@ -106,12 +106,20 @@ object WidgetRenderer {
         val rv = RemoteViews(pkg, if (xs) R.layout.widget_month_xs else R.layout.widget_month)
         applyBg(rv, p)
 
-        rv.setTextViewText(R.id.title, "${ym.year}年${ym.monthValue}月")
+        if (xs) {
+            rv.setTextViewText(R.id.title, ym.monthValue.toString())
+            rv.setTextViewText(R.id.year, "${ym.year}")
+            rv.setTextColor(R.id.year, pal.text)
+            rv.setTextViewText(R.id.month_unit, "月")
+            rv.setTextColor(R.id.month_unit, pal.text)
+        } else {
+            rv.setTextViewText(R.id.title, "${ym.year}年${ym.monthValue}月")
+        }
         rv.setTextColor(R.id.title, pal.text)
         rv.setTextViewTextSize(R.id.title, TypedValue.COMPLEX_UNIT_SP, kind.title)
         for (arrow in intArrayOf(R.id.prev, R.id.next)) {
             rv.setTextColor(arrow, pal.text)
-            rv.setTextViewTextSize(arrow, TypedValue.COMPLEX_UNIT_SP, kind.title + if (xs) 3f else 4f)
+            rv.setTextViewTextSize(arrow, TypedValue.COMPLEX_UNIT_SP, if (xs) 14f else kind.title + 4f)
         }
 
         rv.removeAllViews(R.id.dow_row)
