@@ -194,7 +194,7 @@ object WidgetRenderer {
             d.dayOfWeek == DayOfWeek.SATURDAY -> pal.sat
             else -> pal.text
         }
-        return if (inMonth) c else withAlpha(c, 0x59)
+        return if (inMonth) c else muted(c, isLight(pal.text))
     }
 
     private fun labelColor(index: Int, pal: Pal): Int = when (index) {
@@ -214,6 +214,16 @@ object WidgetRenderer {
     private fun labelIndex(i: Int, p: WidgetPrefs): Int = (i + if (p.mondayStart) 1 else 0) % 7
 
     fun withAlpha(c: Int, a: Int): Int = (c and 0x00FFFFFF) or (a shl 24)
+
+    /**
+     * 前後の月の日付用：半透明にすると壁紙の色が透けて混ざるので、
+     * 不透明なまま灰色寄りにして「薄く」見せる。
+     */
+    fun muted(c: Int, lightText: Boolean): Int {
+        val g = if (lightText) 0x6E else 0xB4
+        fun mix(v: Int) = (v * 0.4 + g * 0.6).toInt().coerceIn(0, 255)
+        return Color.rgb(mix(Color.red(c)), mix(Color.green(c)), mix(Color.blue(c)))
+    }
 
     fun isLight(c: Int): Boolean =
         0.299 * Color.red(c) + 0.587 * Color.green(c) + 0.114 * Color.blue(c) > 150

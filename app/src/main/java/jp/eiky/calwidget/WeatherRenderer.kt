@@ -71,7 +71,7 @@ object WeatherRenderer {
         val narrow = kind == Kind.NARROW
         val wideStyle = kind == Kind.WIDE || kind == Kind.FULL   // 上段に概況・下に時刻ラベル
         val hasNowLine = kind == Kind.S || kind == Kind.TALL      // 「今 …… 19時から雨」
-        val hasLabels = wideStyle || narrow
+        val hasLabels = wideStyle || narrow || kind == Kind.TALL
         val hasDaily = kind == Kind.TALL || kind == Kind.FULL
 
         val rv = RemoteViews(
@@ -151,18 +151,16 @@ object WeatherRenderer {
             if (hasDaily) {
                 rv.removeAllViews(R.id.daily_row)
                 data.days.drop(1).take(5).forEachIndexed { i, d ->
-                    val c = RemoteViews(pkg, R.layout.cell_wx)
+                    val c = RemoteViews(pkg, R.layout.cell_wx_l)
                     c.setTextViewText(R.id.label, if (i == 0) "明日" else WEEKDAYS[d.date.dayOfWeek.value % 7])
                     c.setTextColor(R.id.label, dim)
                     c.setImageViewResource(R.id.icon, WxCode.icon(d.code, true))
-                    val m = SpannableStringBuilder()
-                    colored(m, t(d.max), hiColor)
-                    m.append("/")
-                    colored(m, t(d.min), loColor)
-                    c.setTextViewText(R.id.main, m)
-                    c.setTextColor(R.id.main, pal.text)
-                    c.setTextViewText(R.id.sub, if (d.pop >= 0) "☂${d.pop}%" else "")
-                    c.setTextColor(R.id.sub, pal.sat)
+                    c.setTextViewText(R.id.main, "▲${t(d.max)}")
+                    c.setTextColor(R.id.main, hiColor)
+                    c.setTextViewText(R.id.sub, "▼${t(d.min)}")
+                    c.setTextColor(R.id.sub, loColor)
+                    c.setTextViewText(R.id.pop, if (d.pop >= 0) "${d.pop}%" else "")
+                    c.setTextColor(R.id.pop, pal.sat)
                     rv.addView(R.id.daily_row, c)
                 }
             }
