@@ -70,7 +70,7 @@ object WeatherRenderer {
 
         val narrow = kind == Kind.NARROW
         val wideStyle = kind == Kind.WIDE || kind == Kind.FULL   // 上段に概況・下に時刻ラベル
-        val hasNowLine = kind == Kind.S || kind == Kind.TALL      // 「今 …… 19時から雨」
+        val hasNowLine = kind == Kind.S                           // 「今 …… 19時から雨」
         val hasLabels = wideStyle || narrow || kind == Kind.TALL
         val hasDaily = kind == Kind.TALL || kind == Kind.FULL
 
@@ -94,7 +94,7 @@ object WeatherRenderer {
             rv.setTextColor(R.id.now_label, dim)
             rv.setTextColor(R.id.summary, dim)
         }
-        if (wideStyle) rv.setTextColor(R.id.summary, dim)
+        if (wideStyle || kind == Kind.TALL) rv.setTextColor(R.id.summary, dim)
         rv.removeAllViews(R.id.bar)
 
         if (data == null) {
@@ -136,7 +136,7 @@ object WeatherRenderer {
                         sb.append("${group[0].hour}時")
                         val wet = group.filter { WxCode.wet(it.code) }
                         val pop = group.maxOf { it.pop }
-                        if (wet.isNotEmpty() && pop >= 0) {
+                        if (wet.isNotEmpty() && pop >= 0 && kind != Kind.TALL) {
                             val word = if (narrow) {
                                 if (wet.any { WxCode.cat(it.code) == WxCode.Cat.SNOW }) "\n雪" else "\n雨"
                             } else " "
@@ -174,6 +174,7 @@ object WeatherRenderer {
             rv.setViewVisibility(R.id.bar_box, View.GONE)
             rv.setViewVisibility(R.id.msg, View.VISIBLE)
             rv.setTextViewText(R.id.msg, ghost.phrase)
+            if (kind == Kind.TALL) rv.setTextViewText(R.id.summary, "") // おばけと重ならないように
             if (interactive) rv.setOnClickPendingIntent(R.id.ghost, ghostIntent(ctx, id, ghost.key))
         } else {
             rv.setViewVisibility(R.id.ghost, View.GONE)
