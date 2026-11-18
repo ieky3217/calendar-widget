@@ -182,6 +182,20 @@ object WidgetRenderer {
                 else -> R.drawable.widget_bg_s
             },
         )
+        // Galaxy等のホーム画面はウィジェットの外側を大きな丸みで切り取るため、
+        // 「四角」「小さく丸める」のときは背景を少し内側に縮めて、切り取られない位置に角を置く
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val inset = when (p.corner) {
+                0 -> 6f
+                1 -> 4f
+                else -> 0f
+            }
+            for (side in intArrayOf(
+                RemoteViews.MARGIN_LEFT, RemoteViews.MARGIN_TOP, RemoteViews.MARGIN_RIGHT, RemoteViews.MARGIN_BOTTOM,
+            )) {
+                rv.setViewLayoutMargin(R.id.bg, side, inset, TypedValue.COMPLEX_UNIT_DIP)
+            }
+        }
         rv.setInt(R.id.bg, "setColorFilter", p.bgColor or 0xFF000000.toInt())
         rv.setInt(R.id.bg, "setImageAlpha", (p.bgAlpha.coerceIn(0, 100) * 255) / 100)
     }
