@@ -254,6 +254,27 @@
                 android:textSize="12sp" />
 
             <TextView
+                style="@style/SectionHead"
+                android:text="今日のおばけ" />
+
+            <TextView
+                android:id="@+id/wx_ghosts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="4dp"
+                android:textColor="#FFEDEDED"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/wx_ghost_reset"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="10dp"
+                android:background="#FF2A2A2A"
+                android:text="おばけを呼び戻す"
+                android:textColor="#FFFFFFFF" />
+
+            <TextView
                 android:id="@+id/wx_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

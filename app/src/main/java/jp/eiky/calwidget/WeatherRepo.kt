@@ -16,7 +16,10 @@ data class WxDay(
     val date: LocalDate, val code: Int, val max: Double, val min: Double, val pop: Int,
     val sunset: LocalDateTime? = null,
 )
-data class WxData(val now: WxNow, val hours: List<WxHour>, val days: List<WxDay>, val fetchedAt: Long)
+data class WxData(
+    val now: WxNow, val hours: List<WxHour>, val days: List<WxDay>, val fetchedAt: Long,
+    val prevCode: Int? = null, // 1時間前の天気（雨の降り始め判定用）
+)
 
 /** 天気データの取得（Open-Meteo：APIキー不要）とキャッシュ */
 object WeatherRepo {
@@ -188,7 +191,8 @@ object WeatherRepo {
                 },
             )
         }
-        return WxData(now, hours, daily, at)
+        val prevCode = if (idx >= 1) codes.optInt(idx - 1, 3) else null
+        return WxData(now, hours, daily, at, prevCode)
     }
 }
 

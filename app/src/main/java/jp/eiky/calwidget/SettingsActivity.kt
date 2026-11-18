@@ -190,6 +190,13 @@ class SettingsActivity : Activity() {
                 requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), REQ_LOCATION)
             }
         }
+        showGhosts()
+        findViewById<Button>(R.id.wx_ghost_reset).setOnClickListener {
+            Ghosts.reset(this)
+            WeatherWidgetProvider.updateAll(this)
+            showGhosts()
+            status("おばけを呼び戻しました")
+        }
         val autoSw = findViewById<Switch>(R.id.wx_auto)
         autoSw.isChecked = WeatherRepo.isAuto(this) && LocationHelper.hasBackground(this)
         autoSw.setOnCheckedChangeListener { _, on ->
@@ -209,6 +216,10 @@ class SettingsActivity : Activity() {
                 }
             }
         }
+    }
+
+    private fun showGhosts() {
+        findViewById<TextView>(R.id.wx_ghosts).text = Ghosts.schedule(this, WeatherRepo.cached(this))
     }
 
     private fun status(text: String) {
