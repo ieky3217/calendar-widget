@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF121212"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:id="@+id/screen_title"
+            android:text="@string/app_name"
+            android:textColor="#FFFFFFFF"
+            android:textSize="22sp" />
+
+        <TextView
+            style="@style/SectionHead"
+            android:text="プレビュー" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/preview_wallpaper"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <FrameLayout
+                    android:id="@+id/preview_week"
+                    android:layout_width="170dp"
+                    android:layout_height="100dp" />
+
+                <FrameLayout
+                    android:id="@+id/preview_month"
+                    android:layout_width="180dp"
+                    android:layout_height="180dp"
+                    android:layout_marginTop="16dp" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <TextView
+            style="@style/SectionHead"
+            android:text="背景色" />
+        <RadioGroup
+            android:id="@+id/rg_bg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/rb_bg_black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="14dp"
+                android:buttonTint="#FFE53935"
+                android:text="黒"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+            <RadioButton
+                android:id="@+id/rb_bg_gray"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="14dp"
+                android:buttonTint="#FFE53935"
+                android:text="グレー"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+            <RadioButton
+                android:id="@+id/rb_bg_white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="14dp"
+                android:buttonTint="#FFE53935"
+                android:text="白"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+            <RadioButton
+                android:id="@+id/rb_bg_navy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="14dp"
+                android:buttonTint="#FFE53935"
+                android:text="紺"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+        </RadioGroup>
+        <TextView
+            android:id="@+id/alpha_label"
+            style="@style/SectionHead" />
+
+        <SeekBar
+            android:id="@+id/seek_alpha"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progressTint="#FFE53935"
+            android:thumbTint="#FFE53935" />
+
+        <TextView
+            style="@style/SectionHead"
+            android:text="文字色" />
+        <RadioGroup
+            android:id="@+id/rg_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/rb_text_white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="14dp"
+                android:buttonTint="#FFE53935"
+                android:text="白"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+            <RadioButton
+                android:id="@+id/rb_text_black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="14dp"
+                android:buttonTint="#FFE53935"
+                android:text="黒"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+        </RadioGroup>
+        <LinearLayout
+            android:id="@+id/wx_options"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/SectionHead"
+                android:text="地点" />
+
+            <TextView
+                android:id="@+id/wx_place"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFEDEDED"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/wx_query"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="地名で検索（例：郡山）"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:textColor="#FFFFFFFF"
+                    android:textColorHint="#FF777777"
+                    android:textSize="15sp" />
+
+                <Button
+                    android:id="@+id/wx_search"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="8dp"
+                    android:background="#FF2A2A2A"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="検索"
+                    android:textColor="#FFFFFFFF" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/wx_results"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <Button
+                android:id="@+id/wx_here"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="10dp"
+                android:background="#FF2A2A2A"
+                android:text="現在地に設定"
+                android:textColor="#FFFFFFFF" />
+
+            <Switch
+                android:id="@+id/wx_auto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="現在地を自動で追う"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="位置情報を「常に許可」にする必要があります。天気の更新（約30分ごと）のたびに、おおよその現在地を確認します。"
+                android:textColor="#FF9A9A9A"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/wx_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="#FF9A9A9A"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cal_options"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                style="@style/SectionHead"
+                android:text="今日の丸の色" />
+            <RadioGroup
+                android:id="@+id/rg_accent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/rb_ac_red"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="14dp"
+                    android:buttonTint="#FFE53935"
+                    android:text="赤"
+                    android:textColor="#FFEDEDED"
+                    android:textSize="15sp" />
+                <RadioButton
+                    android:id="@+id/rb_ac_blue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="14dp"
+                    android:buttonTint="#FFE53935"
+                    android:text="青"
+                    android:textColor="#FFEDEDED"
+                    android:textSize="15sp" />
+                <RadioButton
+                    android:id="@+id/rb_ac_yellow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="14dp"
+                    android:buttonTint="#FFE53935"
+                    android:text="黄"
+                    android:textColor="#FFEDEDED"
+                    android:textSize="15sp" />
+                <RadioButton
+                    android:id="@+id/rb_ac_white"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="14dp"
+                    android:buttonTint="#FFE53935"
+                    android:text="白"
+                    android:textColor="#FFEDEDED"
+                    android:textSize="15sp" />
+            </RadioGroup>
+            <TextView
+                style="@style/SectionHead"
+                android:text="週の始まり" />
+            <RadioGroup
+                android:id="@+id/rg_week"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/rb_sun"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="14dp"
+                    android:buttonTint="#FFE53935"
+                    android:text="日曜"
+                    android:textColor="#FFEDEDED"
+                    android:textSize="15sp" />
+                <RadioButton
+                    android:id="@+id/rb_mon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="14dp"
+                    android:buttonTint="#FFE53935"
+                    android:text="月曜"
+                    android:textColor="#FFEDEDED"
+                    android:textSize="15sp" />
+            </RadioGroup>
+            <TextView
+                style="@style/SectionHead"
+                android:text="2×1など1段サイズの表示" />
+            <RadioGroup
+                android:id="@+id/rg_small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/rb_small_month"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="14dp"
+                    android:buttonTint="#FFE53935"
+                    android:text="1か月"
+                    android:textColor="#FFEDEDED"
+                    android:textSize="15sp" />
+                <RadioButton
+                    android:id="@+id/rb_small_week"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#FFE53935"
+                    android:text="1週間"
+                    android:textColor="#FFEDEDED"
+                    android:textSize="15sp" />
+            </RadioGroup>
+
+            <Switch
+                android:id="@+id/sw_holiday"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="祝日を赤で表示"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="28dp"
+            android:background="#FFE53935"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/btn_pin"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="10dp"
+            android:background="#FF2A2A2A"
+            android:text="ホーム画面に追加"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/btn_switch"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="10dp"
+            android:background="#FF2A2A2A"
+            android:text="天気ウィジェットの設定へ"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
+            android:lineSpacingExtra="3dp"
+            android:textColor="#FF9A9A9A"
+            android:textSize="13sp" />
+
+    </LinearLayout>
+</ScrollView>
