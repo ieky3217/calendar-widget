@@ -11,6 +11,7 @@ data class WidgetPrefs(
     val mondayStart: Boolean = false,
     val holidays: Boolean = true,
     val smallMonth: Boolean = true,      // 1段サイズ(2×1など)でも月表示にする
+    val corner: Int = 1,                 // 背景の角：0=なし 1=小 2=大
 )
 
 /** SharedPreferences への保存。id=null は「既定値（新しいウィジェット用）」 */
@@ -37,6 +38,7 @@ object Prefs {
             mondayStart = s.getBoolean(key(id, "monday"), d.mondayStart),
             holidays = s.getBoolean(key(id, "holidays"), d.holidays),
             smallMonth = s.getBoolean(key(id, "smallMonth"), d.smallMonth),
+            corner = s.getInt(key(id, "corner"), d.corner),
         )
     }
 
@@ -50,6 +52,7 @@ object Prefs {
             .putBoolean(key(id, "monday"), p.mondayStart)
             .putBoolean(key(id, "holidays"), p.holidays)
             .putBoolean(key(id, "smallMonth"), p.smallMonth)
+            .putInt(key(id, "corner"), p.corner)
             .apply()
     }
 

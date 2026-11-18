@@ -174,6 +174,14 @@ object WidgetRenderer {
     }
 
     fun applyBg(rv: RemoteViews, p: WidgetPrefs) {
+        rv.setImageViewResource(
+            R.id.bg,
+            when (p.corner) {
+                0 -> R.drawable.widget_bg_none
+                2 -> R.drawable.widget_bg
+                else -> R.drawable.widget_bg_s
+            },
+        )
         rv.setInt(R.id.bg, "setColorFilter", p.bgColor or 0xFF000000.toInt())
         rv.setInt(R.id.bg, "setImageAlpha", (p.bgAlpha.coerceIn(0, 100) * 255) / 100)
     }

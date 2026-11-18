@@ -108,6 +108,44 @@
 
         <TextView
             style="@style/SectionHead"
+            android:text="背景の角" />
+
+        <RadioGroup
+            android:id="@+id/rg_corner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/rb_corner_none"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="14dp"
+                android:buttonTint="#FFE53935"
+                android:text="四角"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+            <RadioButton
+                android:id="@+id/rb_corner_s"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="14dp"
+                android:buttonTint="#FFE53935"
+                android:text="小さく丸める"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+            <RadioButton
+                android:id="@+id/rb_corner_l"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="14dp"
+                android:buttonTint="#FFE53935"
+                android:text="大きく丸める"
+                android:textColor="#FFEDEDED"
+                android:textSize="15sp" />
+        </RadioGroup>
+
+        <TextView
+            style="@style/SectionHead"
             android:text="文字色" />
         <RadioGroup
             android:id="@+id/rg_text"

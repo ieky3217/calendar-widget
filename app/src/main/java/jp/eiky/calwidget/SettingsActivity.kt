@@ -71,6 +71,9 @@ class SettingsActivity : Activity() {
 
         bindRadio(R.id.rg_bg, bgOptions, prefs.bgColor) { prefs = prefs.copy(bgColor = it) }
         bindRadio(R.id.rg_text, textOptions, prefs.textColor) { prefs = prefs.copy(textColor = it) }
+        bindRadio(
+            R.id.rg_corner, listOf(R.id.rb_corner_none to 0, R.id.rb_corner_s to 1, R.id.rb_corner_l to 2), prefs.corner,
+        ) { prefs = prefs.copy(corner = it) }
         bindRadio(R.id.rg_accent, accentOptions, prefs.accent) { prefs = prefs.copy(accent = it) }
         bindRadio(
             R.id.rg_week, listOf(R.id.rb_sun to 0, R.id.rb_mon to 1), if (prefs.mondayStart) 1 else 0,
