@@ -10,5 +10,4 @@
         <LinearLayout android:id="@+id/daily_row" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" />
         <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
     </LinearLayout>
-    <ImageView android:id="@+id/ghost" android:layout_width="40dp" android:layout_height="51dp" android:layout_gravity="top|end" android:layout_marginTop="24dp" android:layout_marginEnd="14dp" android:contentDescription="おばけ" android:scaleType="fitCenter" android:visibility="gone" />
 </FrameLayout>

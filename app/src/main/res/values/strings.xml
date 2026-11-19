@@ -5,4 +5,8 @@
     <string name="widget_desc">背景透過・2×1〜自由サイズのカレンダー</string>
     <string name="weather_widget_name">天気</string>
     <string name="weather_desc">背景透過・サイズ可変の天気予報</string>
+    <string name="sky_widget_name">日の出・月</string>
+    <string name="sky_desc">日の出・日の入りと月の満ち欠け</string>
+    <string name="pressure_widget_name">気圧</string>
+    <string name="pressure_desc">気圧の推移とひとこと</string>
 </resources>

@@ -426,6 +426,26 @@
             android:textColor="#FFFFFFFF"
             android:textSize="15sp" />
 
+        <Button
+            android:id="@+id/btn_sky"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="10dp"
+            android:background="#FF2A2A2A"
+            android:text="日の出・月ウィジェットの設定へ"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/btn_pres"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="10dp"
+            android:background="#FF2A2A2A"
+            android:text="気圧ウィジェットの設定へ"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp" />
+
         <TextView
             android:id="@+id/hint"
             android:layout_width="match_parent"
