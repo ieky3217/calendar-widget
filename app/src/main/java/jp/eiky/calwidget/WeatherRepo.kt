@@ -10,16 +10,21 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class Place(val name: String, val lat: Double, val lon: Double)
-data class WxNow(val temp: Double, val code: Int, val isDay: Boolean, val pop: Int)
+data class WxNow(val temp: Double, val code: Int, val isDay: Boolean, val pop: Int, val pressure: Double = Double.NaN)
 data class WxHour(val hour: Int, val temp: Double, val code: Int, val isDay: Boolean, val pop: Int)
 data class WxDay(
     val date: LocalDate, val code: Int, val max: Double, val min: Double, val pop: Int,
     val sunset: LocalDateTime? = null,
+    val sunrise: LocalDateTime? = null,
 )
 data class WxData(
     val now: WxNow, val hours: List<WxHour>, val days: List<WxDay>, val fetchedAt: Long,
     val prevCode: Int? = null, // 1時間前の天気（雨の降り始め判定用）
+    val pressure: WxPressure? = null,
 )
+
+/** 海面気圧の推移（過去12時間〜12時間先、1時間ごと）。nowIndex が現在 */
+data class WxPressure(val times: List<LocalDateTime>, val values: List<Double>, val nowIndex: Int)
 
 /** 天気データの取得（Open-Meteo：APIキー不要）とキャッシュ */
 object WeatherRepo {
@@ -88,10 +93,10 @@ object WeatherRepo {
         val p = place(c)
         val url = "https://api.open-meteo.com/v1/forecast" +
             "?latitude=${p.lat}&longitude=${p.lon}" +
-            "&current=temperature_2m,weather_code,is_day" +
-            "&hourly=temperature_2m,weather_code,precipitation_probability,is_day" +
-            "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunset" +
-            "&timezone=auto&forecast_days=7"
+            "&current=temperature_2m,weather_code,is_day,pressure_msl" +
+            "&hourly=temperature_2m,weather_code,precipitation_probability,is_day,pressure_msl" +
+            "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset" +
+            "&timezone=auto&past_days=1&forecast_days=7"
         val body = httpGet(url)
         parse(body, 0L) // 壊れたデータは保存しない
         sp(c).edit().putString("json", body).putLong("at", System.currentTimeMillis()).apply()
@@ -150,7 +155,22 @@ object WeatherRepo {
             code = cur.optInt("weather_code", 3),
             isDay = cur.optInt("is_day", 1) == 1,
             pop = pops.optInt(idx, -1),
+            pressure = cur.optDouble("pressure_msl", Double.NaN),
         )
+
+        // 気圧：過去12時間〜12時間先
+        val hp = h.optJSONArray("pressure_msl")
+        val pressure = if (hp == null) null else {
+            val from = maxOf(0, idx - 12)
+            val to = minOf(times.length() - 1, idx + 12)
+            val pt = ArrayList<LocalDateTime>()
+            val pv = ArrayList<Double>()
+            for (i in from..to) {
+                pt.add(LocalDateTime.parse(times.getString(i).take(16)))
+                pv.add(hp.optDouble(i, Double.NaN))
+            }
+            WxPressure(pt, pv, idx - from)
+        }
 
         // 次の正時から12時間ぶん（時間バー用）
         val hours = ArrayList<WxHour>()
@@ -175,6 +195,16 @@ object WeatherRepo {
         val dMin = d.getJSONArray("temperature_2m_min")
         val dPop = d.getJSONArray("precipitation_probability_max")
         val dSunset = d.optJSONArray("sunset")
+        val dSunrise = d.optJSONArray("sunrise")
+        fun dt(a: org.json.JSONArray?, i: Int): LocalDateTime? =
+            a?.optString(i)?.takeIf { s -> s.length >= 16 }?.let { s ->
+                try {
+                    LocalDateTime.parse(s.take(16))
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        val today = LocalDate.parse(cur.getString("time").take(10))
         val daily = (0 until dTime.length()).map {
             WxDay(
                 date = LocalDate.parse(dTime.getString(it)),
@@ -182,17 +212,12 @@ object WeatherRepo {
                 max = dMax.optDouble(it, Double.NaN),
                 min = dMin.optDouble(it, Double.NaN),
                 pop = dPop.optInt(it, -1),
-                sunset = dSunset?.optString(it)?.takeIf { s -> s.length >= 16 }?.let { s ->
-                    try {
-                        LocalDateTime.parse(s.take(16))
-                    } catch (e: Exception) {
-                        null
-                    }
-                },
+                sunset = dt(dSunset, it),
+                sunrise = dt(dSunrise, it),
             )
-        }
+        }.filter { !it.date.isBefore(today) } // past_days=1 で入る昨日の分は除く
         val prevCode = if (idx >= 1) codes.optInt(idx - 1, 3) else null
-        return WxData(now, hours, daily, at, prevCode)
+        return WxData(now, hours, daily, at, prevCode, pressure)
     }
 }
 

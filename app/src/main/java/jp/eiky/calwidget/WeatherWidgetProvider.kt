@@ -89,9 +89,12 @@ class WeatherWidgetProvider : AppWidgetProvider() {
         fun allIds(ctx: Context): IntArray =
             AppWidgetManager.getInstance(ctx).getAppWidgetIds(ComponentName(ctx, WeatherWidgetProvider::class.java))
 
+        /** 天気データを使うウィジェット（天気・日の出／月・気圧）をまとめて更新 */
         fun updateAll(ctx: Context) {
             val mgr = AppWidgetManager.getInstance(ctx)
             allIds(ctx).forEach { render(ctx, mgr, it) }
+            SkyWidgetProvider.updateAll(ctx)
+            PressureWidgetProvider.updateAll(ctx)
         }
 
         fun render(ctx: Context, mgr: AppWidgetManager, id: Int) {
@@ -118,7 +121,9 @@ class WeatherWidgetProvider : AppWidgetProvider() {
 
         /** 次におばけが出入りする時刻に書き換える */
         fun scheduleTick(ctx: Context) {
-            if (allIds(ctx).isEmpty()) return
+            if (allIds(ctx).isEmpty() && SkyWidgetProvider.allIds(ctx).isEmpty() &&
+                PressureWidgetProvider.allIds(ctx).isEmpty()
+            ) return
             val am = ctx.getSystemService(AlarmManager::class.java) ?: return
             val at = Ghosts.nextBoundary(WeatherRepo.cached(ctx))
                 .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + 1000L

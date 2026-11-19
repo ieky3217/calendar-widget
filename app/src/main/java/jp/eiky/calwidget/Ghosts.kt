@@ -3,11 +3,8 @@ package jp.eiky.calwidget
 import android.content.Context
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import kotlin.math.abs
 
 /**
  * 時間帯・天気・季節によって現れるおばけたち。
@@ -69,7 +66,7 @@ object Ghosts {
         out.add(Slot(Def.KUROSUKE, d.atTime(4, 44), d.atTime(4, 45)))
         out.add(Slot(Def.ZOROME, d.atTime(11, 11), d.atTime(11, 12)))
         out.add(Slot(Def.ZOROME, d.atTime(22, 22), d.atTime(22, 23)))
-        if (isFullMoonNight(d)) out.add(Slot(Def.TSUKIMI, d.atTime(20, 0), d.plusDays(1).atStartOfDay()))
+        if (Moon.isFullMoonNight(d)) out.add(Slot(Def.TSUKIMI, d.atTime(20, 0), d.plusDays(1).atStartOfDay()))
         return out
     }
 
@@ -82,16 +79,6 @@ object Ghosts {
         out.add(Slot(Def.NEMURI, d.atTime(23, 0), d.plusDays(1).atTime(1, 0)))
         out.add(Slot(Def.OBAKE, d.atTime(2, 0), d.atTime(2, 30)))
         return out
-    }
-
-    /** 満月の夜か（その日の22時の月齢が満月から±半日以内） */
-    private fun isFullMoonNight(d: LocalDate): Boolean {
-        val ref = ZonedDateTime.of(2000, 1, 6, 18, 14, 0, 0, ZoneId.of("UTC")).toInstant()
-        val t = d.atTime(22, 0).atZone(ZoneId.systemDefault()).toInstant()
-        val days = (t.toEpochMilli() - ref.toEpochMilli()) / 86_400_000.0
-        val synodic = 29.530588853
-        val age = ((days % synodic) + synodic) % synodic
-        return abs(age - synodic / 2) <= 0.5
     }
 
     // ---------- 天気で決まるもの ----------
@@ -163,9 +150,9 @@ object Ghosts {
         val ds = days(now)
         val sun = sunsets(data)
         val fixed = ds.flatMap { seasonal(it) + rare(it) + timeSlots(it, sun) } + weather(now, data)
-        // 天気のおばけは毎時0分・30分に判定し直す
+        // 天気のおばけ・日の出／気圧ウィジェットのため15分ごとにも書き換える
         val hourStart = now.truncatedTo(ChronoUnit.HOURS)
-        val halfHours = listOf(hourStart.plusMinutes(30), hourStart.plusHours(1))
+        val halfHours = listOf(15L, 30L, 45L, 60L).map { hourStart.plusMinutes(it) }
         return (fixed.flatMap { listOf(it.start, it.end) } + halfHours)
             .filter { it.isAfter(now) }
             .minOrNull() ?: now.plusMinutes(30)

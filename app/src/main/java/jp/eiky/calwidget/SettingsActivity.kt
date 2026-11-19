@@ -33,7 +33,8 @@ class SettingsActivity : Activity() {
 
     private var widgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private val isConfig get() = widgetId != AppWidgetManager.INVALID_APPWIDGET_ID
-    private var weatherMode = false
+    private var mode = MODE_CALENDAR
+    private val weatherMode get() = mode != MODE_CALENDAR // 天気データ系（地点・おばけの設定を出す）
     private lateinit var prefs: WidgetPrefs
 
     private val bgOptions = listOf(
@@ -59,11 +60,15 @@ class SettingsActivity : Activity() {
 
         widgetId = intent?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
             ?: AppWidgetManager.INVALID_APPWIDGET_ID
-        weatherMode = if (isConfig) {
-            AppWidgetManager.getInstance(this).getAppWidgetInfo(widgetId)?.provider?.className ==
-                WeatherWidgetProvider::class.java.name
+        mode = if (isConfig) {
+            when (AppWidgetManager.getInstance(this).getAppWidgetInfo(widgetId)?.provider?.className) {
+                WeatherWidgetProvider::class.java.name -> MODE_WEATHER
+                SkyWidgetProvider::class.java.name -> MODE_SKY
+                PressureWidgetProvider::class.java.name -> MODE_PRESSURE
+                else -> MODE_CALENDAR
+            }
         } else {
-            intent?.getStringExtra(EXTRA_MODE) == MODE_WEATHER
+            intent?.getStringExtra(EXTRA_MODE) ?: MODE_CALENDAR
         }
         prefs = if (isConfig) Prefs.load(this, widgetId) else Prefs.loadDefaults(this)
 
@@ -107,33 +112,41 @@ class SettingsActivity : Activity() {
         findViewById<View>(R.id.cal_options).visibility = if (weatherMode) View.GONE else View.VISIBLE
         findViewById<View>(R.id.wx_options).visibility = if (weatherMode) View.VISIBLE else View.GONE
         if (weatherMode) {
-            findViewById<TextView>(R.id.screen_title).text = "天気ウィジェット"
+            findViewById<TextView>(R.id.screen_title).text = "${modeName()}ウィジェット"
             setupWeather()
         }
 
         val saveBtn = findViewById<Button>(R.id.btn_save)
         val pinBtn = findViewById<Button>(R.id.btn_pin)
-        val switchBtn = findViewById<Button>(R.id.btn_switch)
         val hint = findViewById<TextView>(R.id.hint)
-        switchBtn.visibility = if (!isConfig && !weatherMode) View.VISIBLE else View.GONE
-        switchBtn.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java).putExtra(EXTRA_MODE, MODE_WEATHER))
+        val launcherTop = !isConfig && !weatherMode
+        for ((btnId, m) in listOf(R.id.btn_switch to MODE_WEATHER, R.id.btn_sky to MODE_SKY, R.id.btn_pres to MODE_PRESSURE)) {
+            val b = findViewById<Button>(btnId)
+            b.visibility = if (launcherTop) View.VISIBLE else View.GONE
+            b.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java).putExtra(EXTRA_MODE, m)) }
         }
         if (isConfig) {
             saveBtn.text = "このウィジェットに適用"
             pinBtn.visibility = View.GONE
             hint.text = "あとから変更するときは、ウィジェットを長押し →「設定」。"
         } else {
-            val what = if (weatherMode) "天気" else "カレンダー"
+            val what = modeName()
             saveBtn.text = "保存（すべての${what}ウィジェットに適用）"
             hint.text = "ホーム画面を長押し →「ウィジェット」→「カレンダーウィジェット」からも追加できます。" +
                 "追加後はウィジェットの端をドラッグして 2×1・4×1・2×2・4×2 などに自由にリサイズできます。" +
-                if (weatherMode) "\n天気は約30分ごとに自動更新。ウィジェットをタップするとすぐ更新します。" else ""
+                if (weatherMode) "\n天気データは約30分ごとに自動更新。ウィジェットをタップするとすぐ更新します。" else ""
         }
         saveBtn.setOnClickListener { save() }
         pinBtn.setOnClickListener { pin() }
 
         refreshPreview()
+    }
+
+    private fun modeName() = when (mode) {
+        MODE_WEATHER -> "天気"
+        MODE_SKY -> "日の出・月"
+        MODE_PRESSURE -> "気圧"
+        else -> "カレンダー"
     }
 
     private fun alphaText(v: Int) = if (v == 0) "背景の濃さ：0%（完全に透明）" else "背景の濃さ：$v%"
@@ -152,7 +165,15 @@ class SettingsActivity : Activity() {
 
     // ---------- プレビュー ----------
     private fun refreshPreview() {
-        if (weatherMode) {
+        if (mode == MODE_SKY) {
+            showPreview(R.id.preview_week, SkyRenderer.buildKind(this, 0, prefs, SkyRenderer.Kind.S, false, 170f, 100f))
+            showPreview(R.id.preview_month, SkyRenderer.buildKind(this, 0, prefs, SkyRenderer.Kind.TALL, false, 180f, 180f))
+        } else if (mode == MODE_PRESSURE) {
+            showPreview(R.id.preview_week,
+                PressureRenderer.buildKind(this, 0, prefs, PressureRenderer.Kind.S, false, 170f, 100f))
+            showPreview(R.id.preview_month,
+                PressureRenderer.buildKind(this, 0, prefs, PressureRenderer.Kind.TALL, false, 180f, 180f))
+        } else if (weatherMode) {
             val data = WeatherRepo.cached(this)
             val place = WeatherRepo.place(this)
             showPreview(R.id.preview_week,
@@ -405,8 +426,13 @@ class SettingsActivity : Activity() {
         val mgr = AppWidgetManager.getInstance(this)
         if (isConfig) {
             Prefs.save(this, widgetId, prefs)
+            when (mode) {
+                MODE_SKY -> SkyWidgetProvider.renderOne(this, mgr, widgetId)
+                MODE_PRESSURE -> PressureWidgetProvider.renderOne(this, mgr, widgetId)
+                else -> {}
+            }
             if (weatherMode) {
-                WeatherWidgetProvider.render(this, mgr, widgetId)
+                if (mode == MODE_WEATHER) WeatherWidgetProvider.render(this, mgr, widgetId)
                 WeatherWidgetProvider.fetchInBackground(this)
             } else {
                 CalendarWidgetProvider.updateWidget(this, mgr, widgetId)
@@ -416,7 +442,12 @@ class SettingsActivity : Activity() {
             finish()
         } else {
             if (weatherMode) {
-                WeatherWidgetProvider.allIds(this).forEach { Prefs.save(this, it, prefs) }
+                val ids = when (mode) {
+                    MODE_SKY -> SkyWidgetProvider.allIds(this)
+                    MODE_PRESSURE -> PressureWidgetProvider.allIds(this)
+                    else -> WeatherWidgetProvider.allIds(this)
+                }
+                ids.forEach { Prefs.save(this, it, prefs) }
                 WeatherWidgetProvider.updateAll(this)
             } else {
                 CalendarWidgetProvider.allIds(this).forEach { Prefs.save(this, it, prefs) }
@@ -429,7 +460,12 @@ class SettingsActivity : Activity() {
     private fun pin() {
         Prefs.save(this, null, prefs)
         val mgr = getSystemService(AppWidgetManager::class.java)
-        val provider = if (weatherMode) WeatherWidgetProvider::class.java else CalendarWidgetProvider::class.java
+        val provider = when (mode) {
+            MODE_WEATHER -> WeatherWidgetProvider::class.java
+            MODE_SKY -> SkyWidgetProvider::class.java
+            MODE_PRESSURE -> PressureWidgetProvider::class.java
+            else -> CalendarWidgetProvider::class.java
+        }
         if (mgr != null && mgr.isRequestPinAppWidgetSupported) {
             mgr.requestPinAppWidget(ComponentName(this, provider), null, null)
         } else {
@@ -439,7 +475,10 @@ class SettingsActivity : Activity() {
 
     companion object {
         const val EXTRA_MODE = "mode"
+        const val MODE_CALENDAR = "calendar"
         const val MODE_WEATHER = "weather"
+        const val MODE_SKY = "sky"
+        const val MODE_PRESSURE = "pressure"
         private const val REQ_LOCATION = 10
         private const val REQ_AUTO_FG = 11
         private const val REQ_AUTO_BG = 12

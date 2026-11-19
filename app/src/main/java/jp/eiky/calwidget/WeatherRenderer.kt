@@ -89,7 +89,7 @@ object WeatherRenderer {
         rv.setTextViewText(R.id.place, place.name)
         rv.setTextColor(R.id.place, pal.text)
         rv.setTextColor(R.id.temp, pal.text)
-        rv.setTextColor(R.id.msg, dim)
+        if (!wideStyle) rv.setTextColor(R.id.msg, pal.text) // 4×1系は msg なし（上の行の概況に入れる）
         if (hasNowLine) {
             rv.setTextColor(R.id.now_label, dim)
             rv.setTextColor(R.id.summary, dim)
@@ -169,17 +169,21 @@ object WeatherRenderer {
         // おばけ
         val ghost = Ghosts.current(ctx, data)
         if (ghost != null) {
+            // 小さなおばけは気温の右隣。時間の帯はそのまま見せる
             rv.setImageViewResource(R.id.ghost, ghost.res)
             rv.setViewVisibility(R.id.ghost, View.VISIBLE)
-            rv.setViewVisibility(R.id.bar_box, View.GONE)
-            rv.setViewVisibility(R.id.msg, View.VISIBLE)
-            rv.setTextViewText(R.id.msg, ghost.phrase)
-            if (kind == Kind.TALL) rv.setTextViewText(R.id.summary, "") // おばけと重ならないように
+            if (wideStyle) {
+                rv.setTextViewText(R.id.summary, ghost.phrase) // 上の行の概況をひとことに入れ替え
+                rv.setTextColor(R.id.summary, pal.text)
+            } else {
+                rv.setViewVisibility(R.id.msg, View.VISIBLE)
+                rv.setTextViewText(R.id.msg, ghost.phrase)
+                if (kind == Kind.TALL) rv.setTextViewText(R.id.summary, "") // ひとことと重ならないように
+            }
             if (interactive) rv.setOnClickPendingIntent(R.id.ghost, ghostIntent(ctx, id, ghost.key))
         } else {
             rv.setViewVisibility(R.id.ghost, View.GONE)
-            rv.setViewVisibility(R.id.bar_box, View.VISIBLE)
-            rv.setViewVisibility(R.id.msg, View.GONE)
+            if (!wideStyle) rv.setViewVisibility(R.id.msg, View.GONE)
         }
 
         if (interactive) rv.setOnClickPendingIntent(R.id.root, refreshIntent(ctx, id))
